@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #0b0d12;
+  --color-surface: #12151c;
+  --color-surface-hover: #171b25;
+  --color-line: #232838;
+  --color-foreground: #e6e9ef;
+  --color-muted: #8b93a3;
+  --color-accent: #f5b301;
+  --color-accent-hover: #ffc93a;
+  --color-accent-foreground: #14110a;
+  --color-danger: #ef4444;
+  --color-danger-bg: #2a1416;
+  --color-success: #22c55e;
+  --color-success-bg: #12271a;
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-line: var(--color-line);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-danger: var(--color-danger);
+  --color-danger-bg: var(--color-danger-bg);
+  --color-success: var(--color-success);
+  --color-success-bg: var(--color-success-bg);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-foreground);
+}
+
+/* Faixa de sinalização de rodovia — traços amarelos sobre o asfalto,
+   usada como divisor decorativo abaixo da navegação. */
+.road-divider {
+  height: 3px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-accent) 0px,
+    var(--color-accent) 24px,
+    transparent 24px,
+    transparent 44px
+  );
+  opacity: 0.55;
+}
+
+/* Fundo decorativo da home: grade tipo mapa de rastreamento e uma faixa de
+   pista rolando — puramente visual, não interativo. */
+.hero-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-scene::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background-image:
+    linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.35;
+  -webkit-mask-image: radial-gradient(circle at 25% 20%, black, transparent 72%);
+  mask-image: radial-gradient(circle at 25% 20%, black, transparent 72%);
+  animation: grid-pan 50s linear infinite;
+}
+
+.hero-scene .lane {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 12%;
+  height: 3px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-accent) 0 28px,
+    transparent 28px 56px
+  );
+  opacity: 0.25;
+  animation: lane-move 5s linear infinite;
+}
+
+@keyframes grid-pan {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-48px, -48px);
+  }
+}
+
+@keyframes lane-move {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-scene::before,
+  .hero-scene .lane {
+    animation: none;
+  }
+}
