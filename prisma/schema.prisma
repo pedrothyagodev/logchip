@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Cada prefeitura/cliente é um tenant. Todo dado operacional é isolado por tenantId.
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  vehicles   Vehicle[]
+  drivers    Driver[]
+  infractions Infraction[]
+
+  @@map("tenants")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  VIEWER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  email     String
+  name      String
+  role      UserRole @default(VIEWER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Vehicle {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  plate        String
+  model        String?
+  department   String?  // secretaria/órgão responsável pelo veículo
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  drivers      DriverAssignment[]
+  infractions  Infraction[]
+
+  @@unique([tenantId, plate])
+  @@index([tenantId])
+  @@map("vehicles")
+}
+
+model Driver {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  name         String
+  cpf          String
+  cnh          String?
+  department   String?  // secretaria/órgão do condutor
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assignments  DriverAssignment[]
+  infractions  Infraction[]
+
+  @@unique([tenantId, cpf])
+  @@index([tenantId])
+  @@map("drivers")
+}
+
+// Registra qual condutor estava com qual veículo em cada período (base para o FICI).
+model DriverAssignment {
+  id         String    @id @default(cuid())
+  tenantId   String
+  vehicleId  String
+  vehicle    Vehicle   @relation(fields: [vehicleId], references: [id])
+  driverId   String
+  driver     Driver    @relation(fields: [driverId], references: [id])
+  startsAt   DateTime
+  endsAt     DateTime?
+
+  @@index([tenantId])
+  @@index([vehicleId, startsAt, endsAt])
+  @@map("driver_assignments")
+}
+
+enum InfractionStatus {
+  PENDING          // aguardando atribuição de condutor
+  ASSIGNED         // condutor identificado, aguardando confirmação/envio (FICI)
+  SUBMITTED        // FICI enviado ao órgão de trânsito
+  CONFIRMED        // multa transferida ao condutor
+  DISPUTED         // contestada
+  UNASSIGNABLE     // não foi possível identificar o condutor
+}
+
+// Multa de trânsito recebida pela prefeitura, a ser atribuída ao condutor responsável.
+model Infraction {
+  id            String            @id @default(cuid())
+  tenantId      String
+  tenant        Tenant            @relation(fields: [tenantId], references: [id])
+  vehicleId     String
+  vehicle       Vehicle           @relation(fields: [vehicleId], references: [id])
+  driverId      String?
+  driver        Driver?           @relation(fields: [driverId], references: [id])
+  autoNumber    String            // número do auto de infração
+  code          String            // código de enquadramento (CTB)
+  description   String
+  occurredAt    DateTime
+  location      String?
+  status        InfractionStatus  @default(PENDING)
+  deadlineAt    DateTime?         // prazo para indicação do condutor (FICI)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([tenantId, autoNumber])
+  @@index([tenantId, status])
+  @@map("infractions")
+}
