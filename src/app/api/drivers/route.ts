@@ -5,9 +5,9 @@ import { isValidCpf } from "@/lib/validators";
 
 // GET /api/drivers — lista condutores do tenant
 export async function GET(request: NextRequest) {
-  const tenantSlug = getTenantSlug(request);
+  const tenantSlug = await getTenantSlug(request);
   if (!tenantSlug) {
-    return NextResponse.json({ error: "tenant não identificado" }, { status: 400 });
+    return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
 
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
 
 // POST /api/drivers — cadastra um condutor (servidor)
 export async function POST(request: NextRequest) {
-  const tenantSlug = getTenantSlug(request);
+  const tenantSlug = await getTenantSlug(request);
   if (!tenantSlug) {
-    return NextResponse.json({ error: "tenant não identificado" }, { status: 400 });
+    return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
 
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });

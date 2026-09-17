@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DEFAULT_TENANT } from "@/lib/config";
 
 type Infraction = {
   id: string;
@@ -32,9 +31,7 @@ export default function InfractionsPage() {
   const [error, setError] = useState<string | null>(null);
 
   async function fetchInfractions(): Promise<Infraction[]> {
-    const res = await fetch("/api/infractions", {
-      headers: { "x-tenant-slug": DEFAULT_TENANT },
-    });
+    const res = await fetch("/api/infractions");
     if (!res.ok) throw new Error((await res.json()).error ?? "erro ao carregar multas");
     const data = await res.json();
     return data.infractions;
@@ -63,7 +60,6 @@ export default function InfractionsPage() {
     try {
       const res = await fetch(`/api/infractions/${id}/assign`, {
         method: "POST",
-        headers: { "x-tenant-slug": DEFAULT_TENANT },
       });
       if (!res.ok) throw new Error((await res.json()).error ?? "erro ao atribuir condutor");
       setInfractions(await fetchInfractions());

@@ -4,9 +4,9 @@ import { getTenantSlug } from "@/lib/tenant";
 
 // GET /api/infractions — lista multas do tenant, com filtro opcional por status (módulo FICI)
 export async function GET(request: NextRequest) {
-  const tenantSlug = getTenantSlug(request);
+  const tenantSlug = await getTenantSlug(request);
   if (!tenantSlug) {
-    return NextResponse.json({ error: "tenant não identificado" }, { status: 400 });
+    return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
 
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
@@ -30,9 +30,9 @@ export async function GET(request: NextRequest) {
 
 // POST /api/infractions — registra uma nova multa recebida para atribuição (FICI)
 export async function POST(request: NextRequest) {
-  const tenantSlug = getTenantSlug(request);
+  const tenantSlug = await getTenantSlug(request);
   if (!tenantSlug) {
-    return NextResponse.json({ error: "tenant não identificado" }, { status: 400 });
+    return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
 
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });

@@ -1,14 +1,30 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient();
 
+const DEMO_PASSWORD = "logchip123";
+
 // Popula um tenant de demonstração (Prefeitura de Ribeira do Amparo) com
-// veículos, condutores, vínculos e multas para o piloto do FICI.
+// usuário de acesso, veículos, condutores, vínculos e multas para o piloto do FICI.
 async function main() {
   const tenant = await prisma.tenant.upsert({
     where: { slug: "ribeira-do-amparo" },
     update: {},
     create: { name: "Prefeitura de Ribeira do Amparo", slug: "ribeira-do-amparo" },
+  });
+
+  const passwordHash = await hashPassword(DEMO_PASSWORD);
+  await prisma.user.upsert({
+    where: { tenantId_email: { tenantId: tenant.id, email: "admin@ribeira-do-amparo.gov.br" } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      email: "admin@ribeira-do-amparo.gov.br",
+      name: "Administrador",
+      passwordHash,
+      role: "ADMIN",
+    },
   });
 
   const vehicle = await prisma.vehicle.upsert({
@@ -63,6 +79,7 @@ async function main() {
   });
 
   console.log(`Seed concluído para o tenant "${tenant.slug}".`);
+  console.log(`Login: admin@ribeira-do-amparo.gov.br / ${DEMO_PASSWORD}`);
 }
 
 main()

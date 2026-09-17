@@ -5,9 +5,9 @@ import { isValidPlate } from "@/lib/validators";
 
 // GET /api/vehicles — lista veículos do tenant
 export async function GET(request: NextRequest) {
-  const tenantSlug = getTenantSlug(request);
+  const tenantSlug = await getTenantSlug(request);
   if (!tenantSlug) {
-    return NextResponse.json({ error: "tenant não identificado" }, { status: 400 });
+    return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
 
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
 
 // POST /api/vehicles — cadastra um veículo da frota
 export async function POST(request: NextRequest) {
-  const tenantSlug = getTenantSlug(request);
+  const tenantSlug = await getTenantSlug(request);
   if (!tenantSlug) {
-    return NextResponse.json({ error: "tenant não identificado" }, { status: 400 });
+    return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
 
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });

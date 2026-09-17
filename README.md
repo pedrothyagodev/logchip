@@ -31,10 +31,15 @@ O sistema é multi-tenant desde o início: cada prefeitura/cliente é um `Tenant
 
 ```bash
 npm install
-cp .env.example .env   # configurar DATABASE_URL
+cp .env.example .env   # configurar DATABASE_URL e SESSION_SECRET
+docker compose up -d   # sobe um Postgres local (opcional, se não tiver um banco à mão)
 npx prisma migrate dev
-npm run db:seed        # popula um tenant de demonstração ("ribeira-do-amparo")
+npm run db:seed        # popula um tenant de demonstração ("ribeira-do-amparo") e um usuário de acesso
 npm run dev
 ```
 
-Acesse em [http://localhost:3000](http://localhost:3000).
+Acesse em [http://localhost:3000](http://localhost:3000) e faça login com:
+
+- Prefeitura: `ribeira-do-amparo`
+- Email: `admin@ribeira-do-amparo.gov.br`
+- Senha: `logchip123`

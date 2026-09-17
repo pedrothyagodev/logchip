@@ -1,7 +1,6 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import { DEFAULT_TENANT } from "@/lib/config";
 import {
   EntityImportConfig,
   IMPORT_CONFIGS,
@@ -52,7 +51,7 @@ export default function ImportPage() {
       try {
         const res = await fetch(config.apiPath, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "x-tenant-slug": DEFAULT_TENANT },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(config.buildPayload(updated[i].values)),
         });
         if (!res.ok) {

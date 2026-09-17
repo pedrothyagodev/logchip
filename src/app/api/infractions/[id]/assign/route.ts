@@ -8,9 +8,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const tenantSlug = getTenantSlug(request);
+  const tenantSlug = await getTenantSlug(request);
   if (!tenantSlug) {
-    return NextResponse.json({ error: "tenant não identificado" }, { status: 400 });
+    return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
 
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });

@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { DEFAULT_TENANT } from "@/lib/config";
 
 type Assignment = {
   id: string;
@@ -12,9 +11,7 @@ type Assignment = {
 };
 
 async function fetchAssignments(): Promise<Assignment[]> {
-  const res = await fetch("/api/driver-assignments", {
-    headers: { "x-tenant-slug": DEFAULT_TENANT },
-  });
+  const res = await fetch("/api/driver-assignments");
   if (!res.ok) throw new Error((await res.json()).error ?? "erro ao carregar vínculos");
   const data = await res.json();
   return data.assignments;
@@ -54,7 +51,7 @@ export default function DriverAssignmentsPage() {
     try {
       const res = await fetch("/api/driver-assignments", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-tenant-slug": DEFAULT_TENANT },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           vehiclePlate,
           driverCpf,

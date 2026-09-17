@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { DEFAULT_TENANT } from "@/lib/config";
 
 type Vehicle = {
   id: string;
@@ -11,9 +10,7 @@ type Vehicle = {
 };
 
 async function fetchVehicles(): Promise<Vehicle[]> {
-  const res = await fetch("/api/vehicles", {
-    headers: { "x-tenant-slug": DEFAULT_TENANT },
-  });
+  const res = await fetch("/api/vehicles");
   if (!res.ok) throw new Error((await res.json()).error ?? "erro ao carregar veículos");
   const data = await res.json();
   return data.vehicles;
@@ -52,7 +49,7 @@ export default function VehiclesPage() {
     try {
       const res = await fetch("/api/vehicles", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-tenant-slug": DEFAULT_TENANT },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plate, model: model || undefined, department: department || undefined }),
       });
       if (!res.ok) throw new Error((await res.json()).error ?? "erro ao cadastrar veículo");

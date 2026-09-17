@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { SESSION_COOKIE, verifySessionToken } from "@/lib/session";
+import { LogoutButton } from "@/components/logout-button";
 
 const LINKS = [
   { href: "/infractions", label: "Multas (FICI)" },
@@ -18,7 +21,10 @@ function RoadIcon() {
   );
 }
 
-export function Nav() {
+export async function Nav() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const session = token ? await verifySessionToken(token) : null;
+
   return (
     <div>
       <nav className="bg-surface px-6 py-3">
@@ -27,13 +33,21 @@ export function Nav() {
             <RoadIcon />
             Logchip
           </Link>
-          <div className="flex gap-5 text-sm text-muted">
-            {LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="transition-colors hover:text-accent">
-                {link.label}
-              </Link>
-            ))}
-          </div>
+          {session && (
+            <div className="flex gap-5 text-sm text-muted">
+              {LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className="transition-colors hover:text-accent">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          )}
+          {session && (
+            <div className="ml-auto flex items-center gap-3 text-sm text-muted">
+              <span>{session.name}</span>
+              <LogoutButton />
+            </div>
+          )}
         </div>
       </nav>
       <div className="road-divider" />

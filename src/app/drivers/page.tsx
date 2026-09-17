@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { DEFAULT_TENANT } from "@/lib/config";
 
 type Driver = {
   id: string;
@@ -12,9 +11,7 @@ type Driver = {
 };
 
 async function fetchDrivers(): Promise<Driver[]> {
-  const res = await fetch("/api/drivers", {
-    headers: { "x-tenant-slug": DEFAULT_TENANT },
-  });
+  const res = await fetch("/api/drivers");
   if (!res.ok) throw new Error((await res.json()).error ?? "erro ao carregar condutores");
   const data = await res.json();
   return data.drivers;
@@ -54,7 +51,7 @@ export default function DriversPage() {
     try {
       const res = await fetch("/api/drivers", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-tenant-slug": DEFAULT_TENANT },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, cpf, cnh: cnh || undefined, department: department || undefined }),
       });
       if (!res.ok) throw new Error((await res.json()).error ?? "erro ao cadastrar condutor");
