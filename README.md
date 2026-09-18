@@ -13,8 +13,10 @@ Prefeitura de Ribeira do Amparo (BA).
 ## Módulos
 
 - **FICI** (Ficha de Identificação do Condutor Infrator) — atribuição de multas ao condutor responsável. Módulo carro-chefe do piloto.
-- Combustível — controle e detecção de desvio (planejado).
-- Tempo ocioso — monitoramento de utilização da frota (planejado).
+- **Combustível** — registra abastecimentos (hodômetro, litros, valor, posto) e sinaliza abastecimento suspeito quando o volume foge muito do esperado para o km rodado desde o abastecimento anterior, com base no consumo médio (km/l) cadastrado no veículo.
+- **Tempo ocioso** — registra períodos em que o veículo ficou ligado e parado (início, fim, condutor e local opcionais) e sinaliza ociosidade excessiva quando a duração passa de 15 minutos.
+
+Todos os três módulos suportam cadastro manual pela interface e importação em lote via planilha (Excel/CSV), com validação linha a linha.
 
 ## Stack
 
@@ -33,7 +35,7 @@ O sistema é multi-tenant desde o início: cada prefeitura/cliente é um `Tenant
 npm install
 cp .env.example .env   # configurar DATABASE_URL e SESSION_SECRET
 docker compose up -d   # sobe um Postgres local (opcional, se não tiver um banco à mão)
-npx prisma migrate dev
+npx prisma db push     # aplica o schema no banco (projeto não usa migrations)
 npm run db:seed        # popula um tenant de demonstração ("ribeira-do-amparo") e um usuário de acesso
 npm run dev
 ```
