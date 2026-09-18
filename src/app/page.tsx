@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
+import { SESSION_COOKIE, verifySessionToken } from "@/lib/session";
 
 function IconTicket() {
   return (
@@ -115,7 +118,34 @@ const MODULES: { href: string; title: string; description: string; icon: ReactNo
   },
 ];
 
-export default function Home() {
+type Kpi = { label: string; value: number; href: string; tone: "alert" | "neutral" };
+
+async function loadKpis(): Promise<Kpi[] | null> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const session = token ? await verifySessionToken(token) : null;
+  if (!session) return null;
+
+  const [pendingInfractions, suspiciousFuelLogs, excessiveIdleEvents, vehiclesTotal] =
+    await Promise.all([
+      prisma.infraction.count({
+        where: { tenantId: session.tenantId, status: { in: ["PENDING", "UNASSIGNABLE"] } },
+      }),
+      prisma.fuelLog.count({ where: { tenantId: session.tenantId, status: "SUSPICIOUS" } }),
+      prisma.idleEvent.count({ where: { tenantId: session.tenantId, status: "EXCESSIVE" } }),
+      prisma.vehicle.count({ where: { tenantId: session.tenantId } }),
+    ]);
+
+  return [
+    { label: "Multas sem condutor atribuído", value: pendingInfractions, href: "/infractions", tone: "alert" },
+    { label: "Abastecimentos suspeitos", value: suspiciousFuelLogs, href: "/fuel-logs", tone: "alert" },
+    { label: "Ociosidade excessiva", value: excessiveIdleEvents, href: "/idle-events", tone: "alert" },
+    { label: "Veículos na frota", value: vehiclesTotal, href: "/vehicles", tone: "neutral" },
+  ];
+}
+
+export default async function Home() {
+  const kpis = await loadKpis();
+
   return (
     <div className="relative flex-1 overflow-hidden bg-bg px-6 py-16">
       <div className="hero-scene">
@@ -132,6 +162,27 @@ export default function Home() {
         <p className="mt-2 text-muted">
           Menos multas não atribuídas, menos desvio de combustível, menos tempo ocioso.
         </p>
+
+        {kpis && (
+          <div className="mt-8 grid gap-3 sm:grid-cols-4">
+            {kpis.map((kpi) => (
+              <Link
+                key={kpi.href}
+                href={kpi.href}
+                className="rounded-lg border border-line bg-surface p-4 transition-colors hover:border-accent"
+              >
+                <p
+                  className={`text-3xl font-semibold ${
+                    kpi.tone === "alert" && kpi.value > 0 ? "text-danger" : "text-foreground"
+                  }`}
+                >
+                  {kpi.value}
+                </p>
+                <p className="mt-1 text-xs text-muted">{kpi.label}</p>
+              </Link>
+            ))}
+          </div>
+        )}
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {MODULES.map((mod) => (
