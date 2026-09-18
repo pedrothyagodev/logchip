@@ -31,22 +31,29 @@ export async function Nav() {
   return (
     <div>
       <nav className="bg-surface px-6 py-3">
-        <div className="mx-auto flex max-w-5xl items-center gap-6">
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight text-foreground">
+        <div className="mx-auto flex max-w-6xl items-center gap-4">
+          <Link
+            href="/"
+            className="flex shrink-0 items-center gap-2 font-semibold tracking-tight text-foreground"
+          >
             <RoadIcon />
             Logchip
           </Link>
           {session && (
-            <div className="flex gap-5 text-sm text-muted">
+            <div className="flex min-w-0 flex-nowrap gap-4 overflow-x-auto text-sm text-muted">
               {LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className="transition-colors hover:text-accent">
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="shrink-0 whitespace-nowrap transition-colors hover:text-accent"
+                >
                   {link.label}
                 </Link>
               ))}
             </div>
           )}
           {session && (
-            <div className="ml-auto flex items-center gap-3 text-sm text-muted">
+            <div className="ml-auto flex shrink-0 items-center gap-3 text-sm text-muted">
               <span>{session.name}</span>
               <LogoutButton />
             </div>
