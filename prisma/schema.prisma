@@ -19,6 +19,7 @@ model Tenant {
   vehicles   Vehicle[]
   drivers    Driver[]
   infractions Infraction[]
+  fuelLogs   FuelLog[]
 
   @@map("tenants")
 }
@@ -52,11 +53,13 @@ model Vehicle {
   plate        String
   model        String?
   department   String?  // secretaria/órgão responsável pelo veículo
+  avgConsumptionKmPerLiter Float? // consumo médio esperado (km/l), usado para detectar desvio de combustível
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   drivers      DriverAssignment[]
   infractions  Infraction[]
+  fuelLogs     FuelLog[]
 
   @@unique([tenantId, plate])
   @@index([tenantId])
@@ -129,4 +132,32 @@ model Infraction {
   @@unique([tenantId, autoNumber])
   @@index([tenantId, status])
   @@map("infractions")
+}
+
+enum FuelLogStatus {
+  OK           // volume abastecido compatível com o km rodado desde o abastecimento anterior
+  SUSPICIOUS   // volume muito acima do esperado para o km rodado
+  UNVERIFIED   // sem abastecimento anterior ou sem consumo médio cadastrado para comparar
+}
+
+// Abastecimento registrado para um veículo, usado para detectar possível desvio de combustível.
+model FuelLog {
+  id          String        @id @default(cuid())
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  vehicleId   String
+  vehicle     Vehicle       @relation(fields: [vehicleId], references: [id])
+  odometerKm  Float         // km no hodômetro no momento do abastecimento
+  liters      Float
+  totalCost   Float?
+  station     String?
+  occurredAt  DateTime
+  status      FuelLogStatus @default(UNVERIFIED)
+  expectedLiters Float?     // litros esperados calculado a partir do km rodado e do consumo médio
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([tenantId])
+  @@index([vehicleId, occurredAt])
+  @@map("fuel_logs")
 }

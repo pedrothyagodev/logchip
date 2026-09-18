@@ -10,7 +10,7 @@ function normalizeHeader(header: string): string {
     .trim();
 }
 
-export type ImportFieldKind = "text" | "date";
+export type ImportFieldKind = "text" | "date" | "number";
 
 export type ImportField = {
   key: string;
@@ -98,6 +98,14 @@ export function mapAndValidateRow(
         continue;
       }
       values[field.key] = parsed.toISOString();
+    } else if (field.kind === "number") {
+      const normalized = String(rawValue).trim().replace(",", ".");
+      const parsed = Number(normalized);
+      if (!Number.isFinite(parsed)) {
+        errors.push(`"${field.label}" com número inválido: "${rawValue}"`);
+        continue;
+      }
+      values[field.key] = String(parsed);
     } else {
       values[field.key] = String(rawValue).trim();
     }
@@ -110,7 +118,7 @@ export const IMPORT_CONFIGS: EntityImportConfig[] = [
   {
     id: "vehicles",
     title: "Veículos",
-    description: "Colunas esperadas: placa, modelo, secretaria",
+    description: "Colunas esperadas: placa, modelo, secretaria, consumo médio (km/l, opcional)",
     apiPath: "/api/vehicles",
     fields: [
       { key: "plate", label: "Placa", required: true, aliases: ["placa"], kind: "text" },
@@ -122,8 +130,20 @@ export const IMPORT_CONFIGS: EntityImportConfig[] = [
         aliases: ["secretaria", "orgao", "departamento"],
         kind: "text",
       },
+      {
+        key: "avgConsumptionKmPerLiter",
+        label: "Consumo médio (km/l)",
+        required: false,
+        aliases: ["consumo medio", "consumo", "km/l", "km por litro"],
+        kind: "number",
+      },
     ],
-    buildPayload: (v) => ({ plate: v.plate, model: v.model, department: v.department }),
+    buildPayload: (v) => ({
+      plate: v.plate,
+      model: v.model,
+      department: v.department,
+      avgConsumptionKmPerLiter: v.avgConsumptionKmPerLiter ? Number(v.avgConsumptionKmPerLiter) : undefined,
+    }),
   },
   {
     id: "drivers",
@@ -186,6 +206,29 @@ export const IMPORT_CONFIGS: EntityImportConfig[] = [
       occurredAt: v.occurredAt,
       location: v.location || undefined,
       deadlineAt: v.deadlineAt || undefined,
+    }),
+  },
+  {
+    id: "fuel-logs",
+    title: "Abastecimentos",
+    description: "Colunas esperadas: placa, hodometro, litros, data, posto (opcional), valor (opcional)",
+    apiPath: "/api/fuel-logs",
+    requiresBeforeImport: "Importe os veículos antes dos abastecimentos.",
+    fields: [
+      { key: "vehiclePlate", label: "Placa", required: true, aliases: ["placa"], kind: "text" },
+      { key: "odometerKm", label: "Hodômetro (km)", required: true, aliases: ["hodometro", "km", "hodometro km"], kind: "number" },
+      { key: "liters", label: "Litros", required: true, aliases: ["litros", "volume"], kind: "number" },
+      { key: "occurredAt", label: "Data", required: true, aliases: ["data", "data do abastecimento"], kind: "date" },
+      { key: "station", label: "Posto", required: false, aliases: ["posto"], kind: "text" },
+      { key: "totalCost", label: "Valor", required: false, aliases: ["valor", "valor total", "custo"], kind: "number" },
+    ],
+    buildPayload: (v) => ({
+      vehiclePlate: v.vehiclePlate,
+      odometerKm: Number(v.odometerKm),
+      liters: Number(v.liters),
+      occurredAt: v.occurredAt,
+      station: v.station || undefined,
+      totalCost: v.totalCost ? Number(v.totalCost) : undefined,
     }),
   },
 ];

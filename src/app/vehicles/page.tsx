@@ -7,6 +7,7 @@ type Vehicle = {
   plate: string;
   model: string | null;
   department: string | null;
+  avgConsumptionKmPerLiter: number | null;
 };
 
 async function fetchVehicles(): Promise<Vehicle[]> {
@@ -24,6 +25,7 @@ export default function VehiclesPage() {
   const [plate, setPlate] = useState("");
   const [model, setModel] = useState("");
   const [department, setDepartment] = useState("");
+  const [avgConsumption, setAvgConsumption] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -50,12 +52,18 @@ export default function VehiclesPage() {
       const res = await fetch("/api/vehicles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plate, model: model || undefined, department: department || undefined }),
+        body: JSON.stringify({
+          plate,
+          model: model || undefined,
+          department: department || undefined,
+          avgConsumptionKmPerLiter: avgConsumption ? Number(avgConsumption) : undefined,
+        }),
       });
       if (!res.ok) throw new Error((await res.json()).error ?? "erro ao cadastrar veículo");
       setPlate("");
       setModel("");
       setDepartment("");
+      setAvgConsumption("");
       setVehicles(await fetchVehicles());
     } catch (err) {
       setError(err instanceof Error ? err.message : "erro desconhecido");
@@ -105,6 +113,18 @@ export default function VehiclesPage() {
               placeholder="Secretaria de Obras"
             />
           </label>
+          <label className="flex flex-col gap-1 text-sm text-muted">
+            Consumo médio (km/l)
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              value={avgConsumption}
+              onChange={(e) => setAvgConsumption(e.target.value)}
+              className="w-32 rounded border border-line bg-surface px-2 py-1.5 text-foreground"
+              placeholder="10.5"
+            />
+          </label>
           <button
             type="submit"
             disabled={submitting}
@@ -121,19 +141,20 @@ export default function VehiclesPage() {
                 <th className="px-4 py-2 font-medium">Placa</th>
                 <th className="px-4 py-2 font-medium">Modelo</th>
                 <th className="px-4 py-2 font-medium">Secretaria/órgão</th>
+                <th className="px-4 py-2 font-medium">Consumo médio</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {loading && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-6 text-center text-muted">
+                  <td colSpan={4} className="px-4 py-6 text-center text-muted">
                     Carregando...
                   </td>
                 </tr>
               )}
               {!loading && vehicles.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-6 text-center text-muted">
+                  <td colSpan={4} className="px-4 py-6 text-center text-muted">
                     Nenhum veículo cadastrado.
                   </td>
                 </tr>
@@ -143,6 +164,11 @@ export default function VehiclesPage() {
                   <td className="px-4 py-2">{vehicle.plate}</td>
                   <td className="px-4 py-2">{vehicle.model ?? "—"}</td>
                   <td className="px-4 py-2">{vehicle.department ?? "—"}</td>
+                  <td className="px-4 py-2">
+                    {vehicle.avgConsumptionKmPerLiter != null
+                      ? `${vehicle.avgConsumptionKmPerLiter} km/l`
+                      : "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>

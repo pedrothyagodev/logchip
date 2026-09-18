@@ -47,6 +47,8 @@ export async function POST(request: NextRequest) {
 
   const model = typeof body.model === "string" ? body.model : undefined;
   const department = typeof body.department === "string" ? body.department : undefined;
+  const avgConsumptionKmPerLiter =
+    typeof body.avgConsumptionKmPerLiter === "number" ? body.avgConsumptionKmPerLiter : undefined;
 
   const existing = await prisma.vehicle.findUnique({
     where: { tenantId_plate: { tenantId: tenant.id, plate } },
@@ -56,7 +58,7 @@ export async function POST(request: NextRequest) {
   }
 
   const vehicle = await prisma.vehicle.create({
-    data: { tenantId: tenant.id, plate, model, department },
+    data: { tenantId: tenant.id, plate, model, department, avgConsumptionKmPerLiter },
   });
 
   return NextResponse.json({ vehicle }, { status: 201 });

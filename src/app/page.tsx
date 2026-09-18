@@ -50,6 +50,16 @@ function IconUpload() {
   );
 }
 
+function IconFuel() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M4 21V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v15" />
+      <path d="M4 12h10" />
+      <path d="M16 8l3 2v6a1.5 1.5 0 0 0 3 0V9l-2.5-2.5" />
+    </svg>
+  );
+}
+
 const MODULES: { href: string; title: string; description: string; icon: ReactNode }[] = [
   {
     href: "/infractions",
@@ -75,6 +85,12 @@ const MODULES: { href: string; title: string; description: string; icon: ReactNo
     title: "Vínculos condutor-veículo",
     description: "Registra qual condutor ficou com qual veículo em cada período.",
     icon: <IconLink />,
+  },
+  {
+    href: "/fuel-logs",
+    title: "Combustível",
+    description: "Registra abastecimentos e sinaliza volume incompatível com o km rodado.",
+    icon: <IconFuel />,
   },
   {
     href: "/import",

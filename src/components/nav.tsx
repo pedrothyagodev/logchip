@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/vehicles", label: "Veículos" },
   { href: "/drivers", label: "Condutores" },
   { href: "/driver-assignments", label: "Vínculos" },
+  { href: "/fuel-logs", label: "Combustível" },
   { href: "/import", label: "Importar planilha" },
 ];
 
