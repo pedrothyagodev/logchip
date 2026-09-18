@@ -184,6 +184,15 @@ export default async function Home() {
           </div>
         )}
 
+        {kpis && (
+          <Link
+            href="/departments"
+            className="mt-3 inline-block text-sm text-accent transition-colors hover:text-accent-hover"
+          >
+            Ver detalhamento por secretaria/órgão →
+          </Link>
+        )}
+
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {MODULES.map((mod) => (
             <Link

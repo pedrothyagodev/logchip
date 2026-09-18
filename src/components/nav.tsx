@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/driver-assignments", label: "Vínculos" },
   { href: "/fuel-logs", label: "Combustível" },
   { href: "/idle-events", label: "Tempo ocioso" },
+  { href: "/departments", label: "Por secretaria" },
   { href: "/import", label: "Importar planilha" },
 ];
 
