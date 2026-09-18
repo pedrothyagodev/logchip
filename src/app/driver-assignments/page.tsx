@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { useCurrentRole } from "@/lib/useCurrentRole";
+import { canMutate } from "@/lib/authz";
 
 type Assignment = {
   id: string;
@@ -18,6 +20,8 @@ async function fetchAssignments(): Promise<Assignment[]> {
 }
 
 export default function DriverAssignmentsPage() {
+  const role = useCurrentRole();
+  const canEdit = role != null && canMutate(role);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +93,7 @@ export default function DriverAssignmentsPage() {
           </p>
         )}
 
+        {canEdit && (
         <form onSubmit={handleSubmit} className="mt-6 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-sm text-muted">
             Placa do veículo
@@ -137,6 +142,7 @@ export default function DriverAssignmentsPage() {
             {submitting ? "Salvando..." : "Adicionar"}
           </button>
         </form>
+        )}
 
         <div className="mt-6 overflow-hidden rounded-lg border border-line bg-surface">
           <table className="w-full text-left text-sm">

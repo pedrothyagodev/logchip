@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { useCurrentRole } from "@/lib/useCurrentRole";
+import { canMutate } from "@/lib/authz";
 
 type Vehicle = {
   id: string;
@@ -18,6 +20,8 @@ async function fetchVehicles(): Promise<Vehicle[]> {
 }
 
 export default function VehiclesPage() {
+  const role = useCurrentRole();
+  const canEdit = role != null && canMutate(role);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +88,7 @@ export default function VehiclesPage() {
           </p>
         )}
 
+        {canEdit && (
         <form onSubmit={handleSubmit} className="mt-6 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-sm text-muted">
             Placa
@@ -133,6 +138,7 @@ export default function VehiclesPage() {
             {submitting ? "Salvando..." : "Adicionar"}
           </button>
         </form>
+        )}
 
         <div className="mt-6 overflow-hidden rounded-lg border border-line bg-surface">
           <table className="w-full text-left text-sm">

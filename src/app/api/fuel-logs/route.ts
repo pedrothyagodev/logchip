@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getTenantSlug } from "@/lib/tenant";
+import { getSession, getTenantSlug } from "@/lib/tenant";
+import { canMutate } from "@/lib/authz";
 
 // Tolerância acima do esperado antes de marcar como suspeito (30%).
 const SUSPICION_TOLERANCE = 1.3;
@@ -34,12 +35,15 @@ export async function GET(request: NextRequest) {
 // POST /api/fuel-logs — registra um abastecimento e avalia se o volume é compatível
 // com o km rodado desde o abastecimento anterior do mesmo veículo.
 export async function POST(request: NextRequest) {
-  const tenantSlug = await getTenantSlug(request);
-  if (!tenantSlug) {
+  const session = await getSession(request);
+  if (!session) {
     return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
+  if (!canMutate(session.role)) {
+    return NextResponse.json({ error: "sem permissão para essa ação" }, { status: 403 });
+  }
 
-  const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+  const tenant = await prisma.tenant.findUnique({ where: { slug: session.tenantSlug } });
   if (!tenant) {
     return NextResponse.json({ error: "tenant não encontrado" }, { status: 404 });
   }

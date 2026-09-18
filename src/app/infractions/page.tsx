@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useCurrentRole } from "@/lib/useCurrentRole";
+import { canMutate } from "@/lib/authz";
 
 type Infraction = {
   id: string;
@@ -25,6 +27,8 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default function InfractionsPage() {
+  const role = useCurrentRole();
+  const canEdit = role != null && canMutate(role);
   const [infractions, setInfractions] = useState<Infraction[]>([]);
   const [loading, setLoading] = useState(true);
   const [assigningId, setAssigningId] = useState<string | null>(null);
@@ -125,7 +129,7 @@ export default function InfractionsPage() {
                     {STATUS_LABEL[infraction.status] ?? infraction.status}
                   </td>
                   <td className="px-4 py-2">
-                    {infraction.status === "PENDING" && (
+                    {canEdit && infraction.status === "PENDING" && (
                       <button
                         onClick={() => handleAssign(infraction.id)}
                         disabled={assigningId === infraction.id}

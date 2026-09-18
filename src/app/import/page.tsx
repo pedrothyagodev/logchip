@@ -8,10 +8,14 @@ import {
   mapAndValidateRow,
   parseSpreadsheet,
 } from "@/lib/import";
+import { useCurrentRole } from "@/lib/useCurrentRole";
+import { canMutate } from "@/lib/authz";
 
 type ImportOutcome = RowResult & { status: "pending" | "success" | "error"; apiError?: string };
 
 export default function ImportPage() {
+  const role = useCurrentRole();
+  const canEdit = role != null && canMutate(role);
   const [activeId, setActiveId] = useState(IMPORT_CONFIGS[0].id);
   const config = IMPORT_CONFIGS.find((c) => c.id === activeId) as EntityImportConfig;
 
@@ -82,6 +86,14 @@ export default function ImportPage() {
           importar de verdade.
         </p>
 
+        {role != null && !canEdit && (
+          <p className="mt-4 rounded border border-line bg-surface px-3 py-2 text-sm text-muted">
+            Sua conta não tem permissão para importar dados. Fale com um administrador.
+          </p>
+        )}
+
+        {canEdit && (
+        <>
         <div className="mt-6 flex gap-2 border-b border-line">
           {IMPORT_CONFIGS.map((c) => (
             <button
@@ -165,6 +177,8 @@ export default function ImportPage() {
               </table>
             </div>
           </>
+        )}
+        </>
         )}
       </div>
     </div>

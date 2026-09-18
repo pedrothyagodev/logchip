@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getTenantSlug } from "@/lib/tenant";
+import { getSession } from "@/lib/tenant";
+import { canMutate } from "@/lib/authz";
 
 // POST /api/infractions/:id/assign — identifica o condutor responsável (FICI)
 // cruzando o histórico de uso do veículo com a data/hora da infração.
@@ -8,12 +9,15 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const tenantSlug = await getTenantSlug(request);
-  if (!tenantSlug) {
+  const session = await getSession(request);
+  if (!session) {
     return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
+  if (!canMutate(session.role)) {
+    return NextResponse.json({ error: "sem permissão para essa ação" }, { status: 403 });
+  }
 
-  const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+  const tenant = await prisma.tenant.findUnique({ where: { slug: session.tenantSlug } });
   if (!tenant) {
     return NextResponse.json({ error: "tenant não encontrado" }, { status: 404 });
   }

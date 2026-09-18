@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getTenantSlug } from "@/lib/tenant";
+import { getSession, getTenantSlug } from "@/lib/tenant";
+import { canMutate } from "@/lib/authz";
 
 // Acima desse limite, o período parado é sinalizado como ocioso excessivo.
 const IDLE_LIMIT_MINUTES = 15;
@@ -33,12 +34,15 @@ export async function GET(request: NextRequest) {
 
 // POST /api/idle-events — registra um período em que o veículo ficou ligado e parado
 export async function POST(request: NextRequest) {
-  const tenantSlug = await getTenantSlug(request);
-  if (!tenantSlug) {
+  const session = await getSession(request);
+  if (!session) {
     return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   }
+  if (!canMutate(session.role)) {
+    return NextResponse.json({ error: "sem permissão para essa ação" }, { status: 403 });
+  }
 
-  const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+  const tenant = await prisma.tenant.findUnique({ where: { slug: session.tenantSlug } });
   if (!tenant) {
     return NextResponse.json({ error: "tenant não encontrado" }, { status: 404 });
   }

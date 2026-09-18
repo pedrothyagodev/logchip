@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { useCurrentRole } from "@/lib/useCurrentRole";
+import { canMutate } from "@/lib/authz";
 
 type Driver = {
   id: string;
@@ -18,6 +20,8 @@ async function fetchDrivers(): Promise<Driver[]> {
 }
 
 export default function DriversPage() {
+  const role = useCurrentRole();
+  const canEdit = role != null && canMutate(role);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +85,7 @@ export default function DriversPage() {
           </p>
         )}
 
+        {canEdit && (
         <form onSubmit={handleSubmit} className="mt-6 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-sm text-muted">
             Nome
@@ -128,6 +133,7 @@ export default function DriversPage() {
             {submitting ? "Salvando..." : "Adicionar"}
           </button>
         </form>
+        )}
 
         <div className="mt-6 overflow-hidden rounded-lg border border-line bg-surface">
           <table className="w-full text-left text-sm">

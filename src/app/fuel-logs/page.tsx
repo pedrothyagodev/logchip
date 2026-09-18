@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { useCurrentRole } from "@/lib/useCurrentRole";
+import { canMutate } from "@/lib/authz";
 
 type FuelLog = {
   id: string;
@@ -34,6 +36,8 @@ async function fetchFuelLogs(): Promise<FuelLog[]> {
 }
 
 export default function FuelLogsPage() {
+  const role = useCurrentRole();
+  const canEdit = role != null && canMutate(role);
   const [fuelLogs, setFuelLogs] = useState<FuelLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -111,6 +115,7 @@ export default function FuelLogsPage() {
           </p>
         )}
 
+        {canEdit && (
         <form onSubmit={handleSubmit} className="mt-6 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-sm text-muted">
             Placa
@@ -183,6 +188,7 @@ export default function FuelLogsPage() {
             {submitting ? "Salvando..." : "Registrar"}
           </button>
         </form>
+        )}
 
         <div className="mt-6 overflow-hidden rounded-lg border border-line bg-surface">
           <table className="w-full text-left text-sm">
