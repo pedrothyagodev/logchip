@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/drivers", label: "Condutores" },
   { href: "/driver-assignments", label: "Vínculos" },
   { href: "/fuel-logs", label: "Combustível" },
+  { href: "/idle-events", label: "Tempo ocioso" },
   { href: "/import", label: "Importar planilha" },
 ];
 

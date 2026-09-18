@@ -231,4 +231,25 @@ export const IMPORT_CONFIGS: EntityImportConfig[] = [
       totalCost: v.totalCost ? Number(v.totalCost) : undefined,
     }),
   },
+  {
+    id: "idle-events",
+    title: "Tempo ocioso",
+    description: "Colunas esperadas: placa, inicio, fim, cpf (opcional), local (opcional)",
+    apiPath: "/api/idle-events",
+    requiresBeforeImport: "Importe os veículos antes dos períodos ociosos.",
+    fields: [
+      { key: "vehiclePlate", label: "Placa", required: true, aliases: ["placa"], kind: "text" },
+      { key: "startsAt", label: "Início", required: true, aliases: ["inicio", "data inicio"], kind: "date" },
+      { key: "endsAt", label: "Fim", required: true, aliases: ["fim", "data fim"], kind: "date" },
+      { key: "driverCpf", label: "CPF", required: false, aliases: ["cpf"], kind: "text" },
+      { key: "location", label: "Local", required: false, aliases: ["local"], kind: "text" },
+    ],
+    buildPayload: (v) => ({
+      vehiclePlate: v.vehiclePlate,
+      startsAt: v.startsAt,
+      endsAt: v.endsAt,
+      driverCpf: v.driverCpf || undefined,
+      location: v.location || undefined,
+    }),
+  },
 ];

@@ -60,6 +60,15 @@ function IconFuel() {
   );
 }
 
+function IconClock() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}
+
 const MODULES: { href: string; title: string; description: string; icon: ReactNode }[] = [
   {
     href: "/infractions",
@@ -91,6 +100,12 @@ const MODULES: { href: string; title: string; description: string; icon: ReactNo
     title: "Combustível",
     description: "Registra abastecimentos e sinaliza volume incompatível com o km rodado.",
     icon: <IconFuel />,
+  },
+  {
+    href: "/idle-events",
+    title: "Tempo ocioso",
+    description: "Registra períodos parados e sinaliza ociosidade excessiva da frota.",
+    icon: <IconClock />,
   },
   {
     href: "/import",
